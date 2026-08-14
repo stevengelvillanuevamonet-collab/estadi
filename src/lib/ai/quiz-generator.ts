@@ -1,10 +1,10 @@
 import { GoogleGenAI } from "@google/genai";
 import { aiQuizResponseSchema, type AiQuizResponse } from "@/lib/validations/quiz";
 
-// Gemini 2.5 Flash is on Google's free tier (no card required) — see
+// Gemini 3.5 Flash-Lite is on Google's free tier (no card required) — see
 // https://ai.google.dev/gemini-api/docs/pricing for current free-tier limits.
 // Swap the model string below if Google renames/retires it later.
-const MODEL = "gemini-2.5-flash";
+const MODEL = "Gemini 3.5 Flash-Lite";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
