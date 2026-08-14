@@ -1,0 +1,144 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-paper: 253 252 250;
+  --color-ink: 28 35 51;
+  --color-parchment: 243 241 236;
+  --color-margin: 217 212 199;
+  --color-amber: 201 123 46;
+  --color-amber-light: 234 174 99;
+  --color-amber-dark: 156 94 31;
+  --color-moss: 75 107 83;
+  --color-rust: 181 83 60;
+  --ruled-line: rgba(201, 194, 174, 0.16);
+  --surface: rgba(255, 255, 255, 0.5);
+}
+
+.dark {
+  --color-paper: 20 22 28;
+  --color-ink: 237 235 227;
+  --color-parchment: 27 30 38;
+  --color-margin: 51 54 63;
+  --color-amber: 230 163 68;
+  --color-amber-light: 244 199 125;
+  --color-amber-dark: 201 138 46;
+  --color-moss: 116 177 131;
+  --color-rust: 224 131 107;
+  --ruled-line: rgba(120, 125, 145, 0.14);
+  --surface: rgba(255, 255, 255, 0.03);
+}
+
+/* A third full theme mode (alongside light/dark), toggled the same way —
+   a soft pink-and-white palette with a vivid pink/magenta accent. */
+.pink {
+  --color-paper: 255 250 252;
+  --color-ink: 46 20 34;
+  --color-parchment: 253 232 240;
+  --color-margin: 244 191 214;
+  --color-amber: 219 39 119;
+  --color-amber-light: 244 114 182;
+  --color-amber-dark: 157 23 77;
+  --color-moss: 75 107 83;
+  --color-rust: 225 29 72;
+  --ruled-line: rgba(244, 191, 214, 0.22);
+  --surface: rgba(255, 255, 255, 0.6);
+}
+
+/* Unlockable accent themes (Rewards shop) — override just the two accent
+   tokens; ink/paper/parchment/margin keep managing light vs. dark. Declared
+   after .dark so they win when both classes are present on the same element. */
+.theme-ocean {
+  --color-amber: 46 127 201;
+  --color-amber-light: 107 174 224;
+  --color-amber-dark: 31 90 148;
+  --color-rust: 46 156 143;
+}
+.theme-forest {
+  --color-amber: 63 143 92;
+  --color-amber-light: 116 191 142;
+  --color-amber-dark: 42 107 65;
+  --color-rust: 138 156 63;
+}
+.theme-rose {
+  --color-amber: 201 82 127;
+  --color-amber-light: 227 140 174;
+  --color-amber-dark: 156 55 96;
+  --color-rust: 217 115 90;
+}
+.theme-violet {
+  --color-amber: 124 92 201;
+  --color-amber-light: 167 143 224;
+  --color-amber-dark: 91 63 156;
+  --color-rust: 176 82 156;
+}
+
+@layer base {
+  body {
+    @apply bg-paper text-ink font-body antialiased;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-display;
+  }
+  ::selection {
+    background-color: rgb(var(--color-amber-light));
+    color: rgb(var(--color-ink));
+  }
+
+  /* Smooth, subtle transition on theme toggle without touching every file */
+  body,
+  main,
+  header,
+  nav,
+  aside,
+  section,
+  div,
+  button,
+  input,
+  textarea,
+  select,
+  a,
+  svg {
+    transition-property: background-color, border-color, color, box-shadow;
+    transition-duration: 220ms;
+    transition-timing-function: ease-out;
+  }
+}
+
+@layer components {
+  /* Lightly-textured content surface — a minimal nod to the notebook motif
+     rather than a heavy decorative one. */
+  .notebook-page {
+    @apply relative rounded-xl border border-margin/50 bg-paper shadow-sm;
+  }
+
+  .card {
+    @apply rounded-xl border border-margin/40 bg-parchment/60 shadow-sm transition-shadow duration-200 hover:shadow-md;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-ink px-4 py-2 text-sm font-medium text-paper transition-all duration-150 hover:opacity-90 active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber disabled:opacity-50 disabled:active:scale-100;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-margin bg-parchment/60 px-4 py-2 text-sm font-medium text-ink transition-all duration-150 hover:bg-parchment active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber disabled:opacity-50 disabled:active:scale-100;
+  }
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-rust/30 bg-rust/5 px-3 py-1.5 text-sm font-medium text-rust transition-colors hover:bg-rust/10;
+  }
+
+  .input {
+    @apply w-full rounded-lg border border-margin bg-parchment/40 px-3 py-2 text-sm text-ink placeholder:text-ink/40 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-amber;
+  }
+  .label {
+    @apply mb-1 block text-xs font-medium uppercase tracking-wide text-ink/50;
+  }
+}
+
+@layer utilities {
+  .no-transition {
+    transition: none !important;
+  }
+}
