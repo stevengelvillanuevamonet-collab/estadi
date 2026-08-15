@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@google/genai": "^0.15.0",
+    "@napi-rs/canvas": "^1.0.6",
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.47.10",
     "clsx": "^2.1.1",

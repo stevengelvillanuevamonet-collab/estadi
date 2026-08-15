@@ -19,8 +19,16 @@ export async function extractTextFromFile(
 
   try {
     if (mimeType === "application/pdf" || lowerName.endsWith(".pdf")) {
+      // Import order matters: pdf-parse/worker sets up the native canvas
+      // polyfills (DOMMatrix, ImageData, etc.) that pdfjs-dist expects to
+      // exist at module-evaluation time. It must fully evaluate before
+      // pdf-parse itself is imported, or extraction throws
+      // "DOMMatrix is not defined" in a serverless environment like Vercel
+      // (this doesn't reproduce in every local dev setup, which is what
+      // makes it easy to miss until it's in production).
+      const { CanvasFactory } = await import("pdf-parse/worker");
       const { PDFParse, PasswordException, InvalidPDFException } = await import("pdf-parse");
-      const parser = new PDFParse({ data: buffer });
+      const parser = new PDFParse({ data: buffer, CanvasFactory });
       try {
         const result = await parser.getText();
         const text = truncate(stripPdfPageMarkers(result.text));
