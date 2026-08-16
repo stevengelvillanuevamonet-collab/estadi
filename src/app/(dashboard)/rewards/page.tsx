@@ -12,7 +12,9 @@ export default async function RewardsPage() {
     await Promise.all([
       supabase
         .from("profiles")
-        .select("points, lifetime_points, unlocked_themes, active_theme, streak_freezes_available")
+        .select(
+          "points, lifetime_points, unlocked_themes, active_theme, streak_freezes_available, last_active_date, unlocked_accessories, equipped_accessories"
+        )
         .eq("id", user!.id)
         .single(),
       supabase.rpc("get_friend_leaderboard", { p_period: "week" }),
@@ -27,6 +29,9 @@ export default async function RewardsPage() {
       unlockedThemes={profile?.unlocked_themes ?? []}
       activeTheme={profile?.active_theme ?? "default"}
       streakFreezesAvailable={profile?.streak_freezes_available ?? 0}
+      lastActiveDate={profile?.last_active_date ?? null}
+      unlockedAccessories={profile?.unlocked_accessories ?? []}
+      equippedAccessories={(profile?.equipped_accessories as Record<string, string>) ?? {}}
       weeklyLeaderboard={(weekly ?? []) as LeaderboardRow[]}
       monthlyLeaderboard={(monthly ?? []) as LeaderboardRow[]}
       friendRequests={

@@ -5,6 +5,7 @@ import { NewSubjectForm } from "@/components/subjects/new-subject-form";
 import { MOOD_EMOJI } from "@/lib/validations/mood";
 import { getNextMilestone, getStreakBonus } from "@/lib/data/streaks";
 import { IconBadge } from "@/components/ui/icon-badge";
+import { CompanionCard } from "@/components/companion/companion-card";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -14,7 +15,9 @@ export default async function DashboardPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("points, full_name, current_streak, longest_streak, streak_freezes_available")
+    .select(
+      "points, lifetime_points, full_name, current_streak, longest_streak, streak_freezes_available, last_active_date, pet_name, equipped_accessories"
+    )
     .eq("id", user!.id)
     .maybeSingle();
 
@@ -65,6 +68,14 @@ export default async function DashboardPage() {
           {profile?.points ?? 0} pts
         </Link>
       </div>
+
+      <CompanionCard
+        petName={profile?.pet_name ?? "Bara"}
+        lifetimePoints={profile?.lifetime_points ?? 0}
+        currentStreak={streak}
+        lastActiveDate={profile?.last_active_date ?? null}
+        equippedAccessories={(profile?.equipped_accessories as Record<string, string>) ?? {}}
+      />
 
       {todayMood ? (
         <div className="card flex items-center justify-between p-4">

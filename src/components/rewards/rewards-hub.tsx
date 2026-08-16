@@ -5,10 +5,11 @@ import { AnimatePresence, motion } from "framer-motion";
 import type { LeaderboardRow } from "@/lib/types/database.types";
 import { cn } from "@/lib/utils";
 import { ShopTab } from "@/components/rewards/shop-tab";
+import { CompanionTab } from "@/components/companion/companion-tab";
 import { LeaderboardTab } from "@/components/rewards/leaderboard-tab";
 import { FriendsTab, type FriendRequestRow } from "@/components/rewards/friends-tab";
 
-const TABS = ["Shop", "Leaderboard", "Friends"] as const;
+const TABS = ["Shop", "Companion", "Leaderboard", "Friends"] as const;
 
 export function RewardsHub({
   points,
@@ -16,6 +17,9 @@ export function RewardsHub({
   unlockedThemes,
   activeTheme,
   streakFreezesAvailable,
+  lastActiveDate,
+  unlockedAccessories,
+  equippedAccessories,
   weeklyLeaderboard,
   monthlyLeaderboard,
   friendRequests,
@@ -25,6 +29,9 @@ export function RewardsHub({
   unlockedThemes: string[];
   activeTheme: string;
   streakFreezesAvailable: number;
+  lastActiveDate: string | null;
+  unlockedAccessories: string[];
+  equippedAccessories: Record<string, string>;
   weeklyLeaderboard: LeaderboardRow[];
   monthlyLeaderboard: LeaderboardRow[];
   friendRequests: FriendRequestRow[];
@@ -39,12 +46,12 @@ export function RewardsHub({
       <div>
         <h1 className="font-display text-3xl font-semibold">Rewards</h1>
         <p className="mt-1 text-ink/60">
-          Earn points from quizzes, flashcards, and daily check-ins — spend them, or see how you
-          compare to friends.
+          Earn points from quizzes, flashcards, and daily check-ins — spend them, dress up your
+          companion, or see how you compare to friends.
         </p>
       </div>
 
-      <div className="flex gap-1 border-b border-margin/50">
+      <div className="flex flex-wrap gap-1 border-b border-margin/50">
         {TABS.map((t) => (
           <button
             key={t}
@@ -86,6 +93,15 @@ export function RewardsHub({
               unlockedThemes={unlockedThemes}
               activeTheme={activeTheme}
               streakFreezesAvailable={streakFreezesAvailable}
+            />
+          )}
+          {tab === "Companion" && (
+            <CompanionTab
+              points={points}
+              lifetimePoints={lifetimePoints}
+              lastActiveDate={lastActiveDate}
+              unlockedAccessories={unlockedAccessories}
+              equippedAccessories={equippedAccessories}
             />
           )}
           {tab === "Leaderboard" && (

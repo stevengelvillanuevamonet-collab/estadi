@@ -15,6 +15,9 @@ export interface Profile {
   last_active_date: string | null;
   streak_freezes_available: number;
   freeze_week_start: string;
+  pet_name: string;
+  unlocked_accessories: string[];
+  equipped_accessories: Record<string, string>;
   created_at: string;
 }
 
