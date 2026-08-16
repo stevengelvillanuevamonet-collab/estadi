@@ -7,6 +7,7 @@ export interface Profile {
   full_name: string | null;
   avatar_url: string | null;
   points: number;
+  lifetime_points: number;
   unlocked_themes: string[];
   active_theme: string;
   current_streak: number;

@@ -11,16 +11,18 @@ import { cn } from "@/lib/utils";
 
 export function ShopTab({
   points,
+  lifetimePoints,
   unlockedThemes,
   activeTheme,
   streakFreezesAvailable,
 }: {
   points: number;
+  lifetimePoints: number;
   unlockedThemes: string[];
   activeTheme: string;
   streakFreezesAvailable: number;
 }) {
-  const { current, next, progress } = getRank(points);
+  const { current, next, progress } = getRank(lifetimePoints);
   const [unlocked, setUnlocked] = useState(new Set(["default", ...unlockedThemes]));
   const [active, setActive] = useState(activeTheme);
   const [pointsLeft, setPointsLeft] = useState(points);
@@ -101,10 +103,13 @@ export function ShopTab({
               />
             </div>
             <p className="mt-1 text-xs text-ink/50">
-              {next.threshold - points} pts to {next.name}
+              {next.threshold - lifetimePoints} pts to {next.name}
             </p>
           </div>
         )}
+        <p className="mt-3 text-xs text-ink/40">
+          Rank tracks everything you've ever earned — spending on the shop below never lowers it.
+        </p>
       </div>
 
       {error && <p className="text-sm text-rust">{error}</p>}

@@ -27,9 +27,14 @@ export function getNextMilestone(streakLength: number): StreakMilestone | null {
   return STREAK_MILESTONES.find((m) => m.days > streakLength) ?? null;
 }
 
-/** Costs for functional (non-cosmetic) perks spent from the points balance. */
+/**
+ * Costs for functional (non-cosmetic) perks spent from the points balance.
+ * Kept lower than the cosmetic shop on purpose — these get used in the
+ * moment during a quiz, not saved toward, so pricing them like a cosmetic
+ * would make them impractical to ever actually use.
+ */
 export const PERK_COSTS = {
-  quizHint: 10,
-  quizRetry: 15,
-  streakSaver: 30,
+  quizHint: 30,
+  quizRetry: 45,
+  streakSaver: 90,
 } as const;

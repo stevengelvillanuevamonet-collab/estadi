@@ -12,6 +12,7 @@ const TABS = ["Shop", "Leaderboard", "Friends"] as const;
 
 export function RewardsHub({
   points,
+  lifetimePoints,
   unlockedThemes,
   activeTheme,
   streakFreezesAvailable,
@@ -20,6 +21,7 @@ export function RewardsHub({
   friendRequests,
 }: {
   points: number;
+  lifetimePoints: number;
   unlockedThemes: string[];
   activeTheme: string;
   streakFreezesAvailable: number;
@@ -80,6 +82,7 @@ export function RewardsHub({
           {tab === "Shop" && (
             <ShopTab
               points={points}
+              lifetimePoints={lifetimePoints}
               unlockedThemes={unlockedThemes}
               activeTheme={activeTheme}
               streakFreezesAvailable={streakFreezesAvailable}
