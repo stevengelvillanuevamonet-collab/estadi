@@ -1,3 +1,6 @@
+"use client";
+
+import { motion, useReducedMotion } from "framer-motion";
 import type { CompanionMood } from "@/lib/data/companion";
 
 const FUR = "#C89B6C";
@@ -21,6 +24,7 @@ export function Capybara({
   hasBird: boolean;
   size?: number;
 }) {
+  const reduceMotion = useReducedMotion();
   const scale = stage <= 1 ? 0.68 : stage <= 3 ? 0.84 : 1;
   const tx = 100 * (1 - scale);
   const ty = 130 * (1 - scale);
@@ -43,7 +47,25 @@ export function Capybara({
       )}
 
       <g transform={`translate(${tx} ${ty}) scale(${scale})`}>
-        {seat === "pad" && <ellipse cx="100" cy="255" rx="70" ry="14" fill={LEAF} />}
+        {seat === "pad" && (
+          <>
+            <ellipse cx="100" cy="255" rx="70" ry="14" fill={LEAF} />
+            {!reduceMotion && (
+              <motion.ellipse
+                cx="100"
+                cy="255"
+                rx="70"
+                ry="14"
+                fill="none"
+                stroke={LEAF}
+                strokeWidth="2"
+                style={{ transformOrigin: "100px 255px" }}
+                animate={{ scale: [1, 1.35], opacity: [0.5, 0] }}
+                transition={{ duration: 2.6, repeat: Infinity, ease: "easeOut" }}
+              />
+            )}
+          </>
+        )}
         {seat === "shadow" && <ellipse cx="100" cy="250" rx="50" ry="10" fill="#00000014" />}
         {seat === "books" && (
           <>
@@ -53,85 +75,156 @@ export function Capybara({
           </>
         )}
 
-        {equipped.neck === "scarf" && (
-          <path d="M62 178 Q100 200 138 178 L134 195 Q100 212 66 195 Z" fill="#B5533C" />
-        )}
+        {/* Everything below breathes gently as one group — the ground props above don't. */}
+        <motion.g
+          animate={reduceMotion ? undefined : { y: [0, -3, 0] }}
+          transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+        >
+          {equipped.neck === "scarf" && (
+            <path d="M62 178 Q100 200 138 178 L134 195 Q100 212 66 195 Z" fill="#B5533C" />
+          )}
 
-        <ellipse cx="100" cy="190" rx="65" ry="50" fill={FUR} />
-        <ellipse cx="65" cy="95" rx="14" ry="18" fill={FUR_DARK} />
-        <ellipse cx="135" cy="95" rx="14" ry="18" fill={FUR_DARK} />
-        <circle cx="100" cy="130" r="48" fill={FUR} />
-        <ellipse cx="100" cy="150" rx="30" ry="20" fill={FUR_LIGHT} />
-        <circle cx="90" cy="148" r="2.5" fill={INK_SOFT} />
-        <circle cx="110" cy="148" r="2.5" fill={INK_SOFT} />
+          <ellipse cx="100" cy="190" rx="65" ry="50" fill={FUR} />
 
-        {showWhiskers && (
-          <>
-            <circle cx="72" cy="150" r="1" fill={FUR_DARK} />
-            <circle cx="72" cy="156" r="1" fill={FUR_DARK} />
-            <circle cx="128" cy="150" r="1" fill={FUR_DARK} />
-            <circle cx="128" cy="156" r="1" fill={FUR_DARK} />
-          </>
-        )}
+          <motion.ellipse
+            cx="65"
+            cy="95"
+            rx="14"
+            ry="18"
+            fill={FUR_DARK}
+            style={{ transformOrigin: "65px 108px" }}
+            animate={reduceMotion ? undefined : { rotate: [0, -12, 0] }}
+            transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 5, ease: "easeInOut" }}
+          />
+          <ellipse cx="135" cy="95" rx="14" ry="18" fill={FUR_DARK} />
 
-        {eyesClosed ? (
-          <>
-            <path d="M78 118 Q85 112 92 118" stroke={INK} strokeWidth="3" fill="none" strokeLinecap="round" />
-            <path d="M108 118 Q115 112 122 118" stroke={INK} strokeWidth="3" fill="none" strokeLinecap="round" />
-          </>
-        ) : (
-          <>
-            <circle cx={alert ? 86 : 87} cy="118" r={alert ? 5.5 : 4.5} fill={INK} />
-            <circle cx={alert ? 114 : 113} cy="118" r={alert ? 5.5 : 4.5} fill={INK} />
-            <circle cx="88.5" cy="116.5" r="1" fill={HIGHLIGHT} />
-            <circle cx="114.5" cy="116.5" r="1" fill={HIGHLIGHT} />
-          </>
-        )}
+          <circle cx="100" cy="130" r="48" fill={FUR} />
+          <ellipse cx="100" cy="150" rx="30" ry="20" fill={FUR_LIGHT} />
+          <circle cx="90" cy="148" r="2.5" fill={INK_SOFT} />
+          <circle cx="110" cy="148" r="2.5" fill={INK_SOFT} />
 
-        <path d="M88 168 Q100 173 112 168" stroke={INK_SOFT} strokeWidth="2.5" fill="none" strokeLinecap="round" />
+          {showWhiskers && (
+            <>
+              <circle cx="72" cy="150" r="1" fill={FUR_DARK} />
+              <circle cx="72" cy="156" r="1" fill={FUR_DARK} />
+              <circle cx="128" cy="150" r="1" fill={FUR_DARK} />
+              <circle cx="128" cy="156" r="1" fill={FUR_DARK} />
+            </>
+          )}
 
-        {equipped.face === "reading_glasses" && (
-          <>
-            <circle cx="87" cy="118" r="13" fill="none" stroke={INK} strokeWidth="2.5" />
-            <circle cx="113" cy="118" r="13" fill="none" stroke={INK} strokeWidth="2.5" />
-            <line x1="74" y1="118" x2="61" y2="112" stroke={INK} strokeWidth="2" />
-            <line x1="126" y1="118" x2="139" y2="112" stroke={INK} strokeWidth="2" />
-          </>
-        )}
+          {eyesClosed ? (
+            <>
+              <path d="M78 118 Q85 112 92 118" stroke={INK} strokeWidth="3" fill="none" strokeLinecap="round" />
+              <path d="M108 118 Q115 112 122 118" stroke={INK} strokeWidth="3" fill="none" strokeLinecap="round" />
+            </>
+          ) : (
+            <motion.g
+              style={{ transformOrigin: "100px 118px" }}
+              animate={reduceMotion ? undefined : { scaleY: [1, 1, 0.1, 1, 1] }}
+              transition={{ duration: 4, repeat: Infinity, times: [0, 0.9, 0.94, 0.98, 1], ease: "easeInOut" }}
+            >
+              <circle cx={alert ? 86 : 87} cy="118" r={alert ? 5.5 : 4.5} fill={INK} />
+              <circle cx={alert ? 114 : 113} cy="118" r={alert ? 5.5 : 4.5} fill={INK} />
+              <circle cx="88.5" cy="116.5" r="1" fill={HIGHLIGHT} />
+              <circle cx="114.5" cy="116.5" r="1" fill={HIGHLIGHT} />
+            </motion.g>
+          )}
 
-        {equipped.head === "graduation_cap" && (
-          <>
-            <rect x="70" y="68" width="60" height="8" rx="1" fill={INK} transform="rotate(-3 100 72)" />
-            <path d="M100 76 L136 88 L100 100 L64 88 Z" fill={INK} />
-            <line x1="136" y1="88" x2="136" y2="106" stroke={INK} strokeWidth="1.5" />
-            <circle cx="136" cy="108" r="3" fill="#C97B2E" />
-          </>
-        )}
+          <path d="M88 168 Q100 173 112 168" stroke={INK_SOFT} strokeWidth="2.5" fill="none" strokeLinecap="round" />
 
-        {equipped.outfit === "seasonal_outfit" && (
-          <rect x="60" y="175" width="16" height="55" rx="4" fill="#7C5CC9" transform="rotate(18 68 200)" opacity={0.85} />
-        )}
+          {eyesClosed && !reduceMotion && (
+            <motion.path
+              d="M113 148 Q128 143 130 153 Q120 158 113 148 Z"
+              fill={LEAF}
+              style={{ transformOrigin: "118px 152px" }}
+              animate={{ rotate: [0, -18, 0, -18, 0], scale: [1, 0.88, 1, 0.88, 1] }}
+              transition={{ duration: 1.6, repeat: Infinity, repeatDelay: 3, ease: "easeInOut" }}
+            />
+          )}
+          {eyesClosed && reduceMotion && (
+            <path d="M113 148 Q128 143 130 153 Q120 158 113 148 Z" fill={LEAF} />
+          )}
 
-        <ellipse cx="68" cy="235" rx="13" ry="10" fill={FUR_DARK} />
-        <ellipse cx="132" cy="235" rx="13" ry="10" fill={FUR_DARK} />
+          {equipped.face === "reading_glasses" && (
+            <>
+              <circle cx="87" cy="118" r="13" fill="none" stroke={INK} strokeWidth="2.5" />
+              <circle cx="113" cy="118" r="13" fill="none" stroke={INK} strokeWidth="2.5" />
+              <line x1="74" y1="118" x2="61" y2="112" stroke={INK} strokeWidth="2" />
+              <line x1="126" y1="118" x2="139" y2="112" stroke={INK} strokeWidth="2" />
+            </>
+          )}
 
-        {showGlow && (
-          <>
-            <circle cx="35" cy="130" r="2" fill="#F0B865" opacity={0.8} />
-            <circle cx="165" cy="140" r="2.5" fill="#F0B865" opacity={0.7} />
-            <circle cx="150" cy="90" r="1.5" fill="#F0B865" opacity={0.9} />
-          </>
-        )}
+          {equipped.head === "graduation_cap" && (
+            <>
+              <rect x="70" y="68" width="60" height="8" rx="1" fill={INK} transform="rotate(-3 100 72)" />
+              <path d="M100 76 L136 88 L100 100 L64 88 Z" fill={INK} />
+              <line x1="136" y1="88" x2="136" y2="106" stroke={INK} strokeWidth="1.5" />
+              <circle cx="136" cy="108" r="3" fill="#C97B2E" />
+            </>
+          )}
 
-        {hasBird && (
-          <g transform="translate(112 55)">
-            <ellipse cx="0" cy="8" rx="9" ry="7" fill="#5B7FA6" />
-            <circle cx="8" cy="4" r="5" fill="#5B7FA6" />
-            <path d="M13 4 L18 3 L13 6 Z" fill="#E0A343" />
-            <circle cx="10" cy="3" r="0.8" fill={INK} />
-            <path d="M-6 5 Q-10 8 -6 11" stroke="#3A5A7A" strokeWidth="1.5" fill="none" />
-          </g>
-        )}
+          {equipped.outfit === "seasonal_outfit" && (
+            <rect
+              x="60"
+              y="175"
+              width="16"
+              height="55"
+              rx="4"
+              fill="#7C5CC9"
+              transform="rotate(18 68 200)"
+              opacity={0.85}
+            />
+          )}
+
+          <ellipse cx="68" cy="235" rx="13" ry="10" fill={FUR_DARK} />
+          <ellipse cx="132" cy="235" rx="13" ry="10" fill={FUR_DARK} />
+
+          {showGlow &&
+            (reduceMotion ? (
+              <>
+                <circle cx="35" cy="130" r="2" fill="#F0B865" opacity={0.8} />
+                <circle cx="165" cy="140" r="2.5" fill="#F0B865" opacity={0.7} />
+                <circle cx="150" cy="90" r="1.5" fill="#F0B865" opacity={0.9} />
+              </>
+            ) : (
+              <>
+                <motion.circle
+                  cx="35"
+                  cy="130"
+                  r="2"
+                  fill="#F0B865"
+                  animate={{ opacity: [0.3, 0.9, 0.3] }}
+                  transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+                />
+                <motion.circle
+                  cx="165"
+                  cy="140"
+                  r="2.5"
+                  fill="#F0B865"
+                  animate={{ opacity: [0.7, 0.2, 0.7] }}
+                  transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut", delay: 0.4 }}
+                />
+                <motion.circle
+                  cx="150"
+                  cy="90"
+                  r="1.5"
+                  fill="#F0B865"
+                  animate={{ opacity: [0.9, 0.4, 0.9] }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut", delay: 0.8 }}
+                />
+              </>
+            ))}
+
+          {hasBird && (
+            <g transform="translate(112 55)">
+              <ellipse cx="0" cy="8" rx="9" ry="7" fill="#5B7FA6" />
+              <circle cx="8" cy="4" r="5" fill="#5B7FA6" />
+              <path d="M13 4 L18 3 L13 6 Z" fill="#E0A343" />
+              <circle cx="10" cy="3" r="0.8" fill={INK} />
+              <path d="M-6 5 Q-10 8 -6 11" stroke="#3A5A7A" strokeWidth="1.5" fill="none" />
+            </g>
+          )}
+        </motion.g>
       </g>
     </svg>
   );

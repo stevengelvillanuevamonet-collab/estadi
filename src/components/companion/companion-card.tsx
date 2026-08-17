@@ -42,11 +42,11 @@ export function CompanionCard({
   }
 
   return (
-    <div className="notebook-page flex items-center gap-4 p-5">
-      <Capybara stage={stage} mood={mood} equipped={equippedAccessories} hasBird={bird} size={96} />
+    <div className="notebook-page flex flex-col items-center gap-4 p-5 text-center sm:flex-row sm:text-left">
+      <Capybara stage={stage} mood={mood} equipped={equippedAccessories} hasBird={bird} size={130} />
       <div className="min-w-0 flex-1">
         {editing ? (
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center justify-center gap-1.5 sm:justify-start">
             <input
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
@@ -65,7 +65,7 @@ export function CompanionCard({
               setDraft(name);
               setEditing(true);
             }}
-            className="group flex items-center gap-1.5 font-display text-lg font-semibold"
+            className="group flex items-center justify-center gap-1.5 font-display text-lg font-semibold sm:justify-start"
           >
             {name}
             <Pencil size={12} className="text-ink/30 opacity-0 transition-opacity group-hover:opacity-100" />

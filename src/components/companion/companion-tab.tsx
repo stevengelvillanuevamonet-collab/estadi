@@ -68,7 +68,7 @@ export function CompanionTab({
   return (
     <div className="space-y-6">
       <div className="notebook-page flex flex-col items-center gap-3 p-6 text-center">
-        <Capybara stage={stage} mood={mood} equipped={equipped} hasBird={bird} size={140} />
+        <Capybara stage={stage} mood={mood} equipped={equipped} hasBird={bird} size={200} />
         <p className="text-sm text-ink/60">
           Evolves as your lifetime points grow, and never demotes when you spend.
           {!bird && " The bird companion can't be bought — only earned at Scholar Emeritus."}
