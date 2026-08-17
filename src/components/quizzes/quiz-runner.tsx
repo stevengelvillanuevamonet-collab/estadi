@@ -16,15 +16,27 @@ import type { StreakResult } from "@/app/actions/streaks";
 import { PERK_COSTS } from "@/lib/data/streaks";
 import { cn } from "@/lib/utils";
 import { PointsPopup } from "@/components/points/points-popup";
+import { Capybara } from "@/components/companion/capybara";
+import { CompanionReaction, type ReactionTrigger } from "@/components/companion/companion-reaction";
+import { getEvolutionStage, getCompanionMood, hasBirdCompanion } from "@/lib/data/companion";
+
+export interface CompanionState {
+  lifetimePoints: number;
+  lastActiveDate: string | null;
+  currentStreak: number;
+  equippedAccessories: Record<string, string>;
+}
 
 export function QuizRunner({
   subjectId,
   quiz,
   questions,
+  companion,
 }: {
   subjectId: string;
   quiz: Quiz;
   questions: QuizQuestion[];
+  companion: CompanionState;
 }) {
   const [attemptId, setAttemptId] = useState<string | null>(null);
   const [index, setIndex] = useState(0);
@@ -36,12 +48,17 @@ export function QuizRunner({
   const [finished, setFinished] = useState(false);
   const [starting, setStarting] = useState(true);
   const [streakNotice, setStreakNotice] = useState<StreakResult | null>(null);
+  const [reaction, setReaction] = useState<ReactionTrigger | null>(null);
 
   const [hiddenOptions, setHiddenOptions] = useState<number[]>([]);
   const [usedHint, setUsedHint] = useState(false);
   const [usedRetry, setUsedRetry] = useState(false);
   const [perkPending, setPerkPending] = useState(false);
   const [perkError, setPerkError] = useState<string | null>(null);
+
+  const stage = getEvolutionStage(companion.lifetimePoints);
+  const mood = getCompanionMood(companion.lastActiveDate);
+  const bird = hasBirdCompanion(companion.lifetimePoints);
 
   useEffect(() => {
     startQuizAttempt(quiz.id).then((res) => {
@@ -69,6 +86,7 @@ export function QuizRunner({
       question_id: question.id,
       selected_index: optionIndex,
     });
+    setReaction({ key: Date.now(), type: result.isCorrect ? "correct" : "incorrect" });
     if (result.isCorrect) {
       setScore((s) => s + 1);
       const amount = result.pointsAwarded ?? 0;
@@ -119,6 +137,7 @@ export function QuizRunner({
       setIndex((i) => i + 1);
       setSelected(null);
       setRevealed(false);
+      setReaction(null);
       return;
     }
     if (attemptId) await completeQuizAttempt(attemptId, subjectId);
@@ -136,8 +155,13 @@ export function QuizRunner({
   }
 
   if (finished) {
+    const scoreRatio = questions.length > 0 ? score / questions.length : 0;
+    const finishedMood = scoreRatio >= 0.8 ? "content" : mood;
     return (
       <div className="notebook-page animate-scale-in p-8 text-center">
+        <div className="mx-auto w-fit">
+          <Capybara stage={stage} mood={finishedMood} equipped={companion.equippedAccessories} hasBird={bird} size={110} />
+        </div>
         <h1 className="font-display text-2xl font-semibold">Quiz complete</h1>
         <p className="mt-2 font-mono text-3xl font-semibold text-rust">
           {score}/{questions.length}
@@ -193,7 +217,21 @@ export function QuizRunner({
           className="notebook-page relative p-6"
         >
           <PointsPopup popup={pointsPopup} />
-          <div className="flex items-start justify-between gap-3 pr-16">
+
+          <div className="absolute -top-4 left-4 z-10">
+            <div className="relative">
+              <Capybara
+                stage={stage}
+                mood={mood}
+                equipped={companion.equippedAccessories}
+                hasBird={bird}
+                size={52}
+              />
+              <CompanionReaction trigger={reaction} />
+            </div>
+          </div>
+
+          <div className="flex items-start justify-between gap-3 pl-16 pr-16">
             <p className="font-medium">{question.question}</p>
           </div>
 
