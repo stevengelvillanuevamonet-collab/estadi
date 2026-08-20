@@ -5,6 +5,18 @@ import { createClient } from "@/lib/supabase/server";
 import { materialSchema } from "@/lib/validations/material";
 import { extractTextFromFile } from "@/lib/files/extract-text";
 
+/**
+ * Creates a note. If a file was attached, the CLIENT must have already
+ * uploaded it directly to Supabase Storage (see notes-tab.tsx) and passed
+ * its path here — we deliberately never accept raw file bytes in this
+ * server action's FormData. Vercel enforces a hard ~4.5MB request body
+ * limit on all Serverless Functions (including Server Actions) that
+ * cannot be raised by any app-level config, so routing large files
+ * through here would silently fail for anything much bigger than a few
+ * MB. Downloading the file back from Storage for extraction, on the
+ * other hand, is a normal outbound fetch from within the function and
+ * isn't subject to that limit.
+ */
 export async function createMaterial(formData: FormData) {
   const supabase = await createClient();
   const {
@@ -23,27 +35,34 @@ export async function createMaterial(formData: FormData) {
     return { error: parsed.error.issues[0]?.message ?? "Invalid note." };
   }
 
-  const file = formData.get("file") as File | null;
-  let filePath: string | null = null;
-  let fileType: string | null = null;
-  let sourceType: "text" | "file" = "text";
+  const filePathRaw = formData.get("file_path");
+  const fileTypeRaw = formData.get("file_type");
+  const filePath = filePathRaw ? String(filePathRaw) : null;
+  const fileType = fileTypeRaw ? String(fileTypeRaw) : null;
+
   let content = parsed.data.content;
   let extractionWarning: string | undefined;
+  let sourceType: "text" | "file" = "text";
 
-  if (file && file.size > 0) {
-    const path = `${user.id}/${parsed.data.subject_id}/${Date.now()}-${file.name}`;
-    const bytes = Buffer.from(await file.arrayBuffer());
+  if (filePath) {
+    // Ownership check: the path must live under this user's own folder,
+    // matching the storage RLS policy — belt-and-suspenders even though
+    // RLS already enforces this at the storage layer.
+    if (!filePath.startsWith(`${user.id}/`)) {
+      return { error: "That file doesn't belong to your account." };
+    }
 
-    const { error: uploadError } = await supabase.storage
+    const { data: blob, error: downloadError } = await supabase.storage
       .from("materials")
-      .upload(path, bytes, { contentType: file.type || undefined });
-    if (uploadError) return { error: `File upload failed: ${uploadError.message}` };
+      .download(filePath);
+    if (downloadError || !blob) {
+      return { error: `Couldn't read the uploaded file: ${downloadError?.message ?? "unknown error"}` };
+    }
 
-    filePath = path;
-    fileType = file.type;
+    const bytes = Buffer.from(await blob.arrayBuffer());
     sourceType = "file";
 
-    const extracted = await extractTextFromFile(bytes, file.type, file.name);
+    const extracted = await extractTextFromFile(bytes, fileType ?? "", filePath);
     extractionWarning = extracted.warning;
     if (extracted.text) {
       // Typed notes (if any) come first, extracted text follows.
