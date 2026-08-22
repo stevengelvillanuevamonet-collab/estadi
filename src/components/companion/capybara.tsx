@@ -1,6 +1,3 @@
-"use client";
-
-import { motion, useReducedMotion } from "framer-motion";
 import type { CompanionMood } from "@/lib/data/companion";
 
 const FUR = "#C89B6C";
@@ -10,6 +7,41 @@ const INK = "#3A2A1A";
 const INK_SOFT = "#4A3222";
 const HIGHLIGHT = "#F5F0E6";
 const LEAF = "#7FA65C";
+
+/**
+ * Ambient animations are plain CSS @keyframes, not Framer Motion — for
+ * simple infinite loops on nested SVG <g> elements, native CSS animation
+ * is more reliably supported across browsers than a JS animation engine
+ * driving SVG transforms. @media (prefers-reduced-motion) below handles
+ * accessibility without needing a JS hook or SSR-timing edge cases.
+ */
+const STYLE = `
+  @keyframes capy-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+  @keyframes capy-ear { 0%, 85%, 100% { transform: rotate(0deg); } 92% { transform: rotate(-14deg); } }
+  @keyframes capy-blink { 0%, 90%, 96%, 100% { transform: scaleY(1); } 93% { transform: scaleY(0.1); } }
+  @keyframes capy-chew {
+    0%, 60%, 100% { transform: rotate(0deg) scale(1); }
+    15% { transform: rotate(-18deg) scale(0.88); }
+    30% { transform: rotate(0deg) scale(1); }
+    45% { transform: rotate(-18deg) scale(0.88); }
+  }
+  @keyframes capy-ripple { 0% { transform: scale(1); opacity: 0.5; } 100% { transform: scale(1.35); opacity: 0; } }
+  @keyframes capy-twinkle { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.9; } }
+
+  .capy-bob { animation: capy-bob 2.4s ease-in-out infinite; }
+  .capy-ear { animation: capy-ear 6s ease-in-out infinite; }
+  .capy-blink { animation: capy-blink 4s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+  .capy-chew { animation: capy-chew 4.6s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+  .capy-ripple { animation: capy-ripple 2.6s ease-out infinite; }
+  .capy-twinkle { animation: capy-twinkle 1.8s ease-in-out infinite; }
+  .capy-twinkle-2 { animation: capy-twinkle 2.2s ease-in-out infinite 0.4s; }
+  .capy-twinkle-3 { animation: capy-twinkle 1.5s ease-in-out infinite 0.8s; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .capy-bob, .capy-ear, .capy-blink, .capy-chew, .capy-ripple,
+    .capy-twinkle, .capy-twinkle-2, .capy-twinkle-3 { animation: none !important; }
+  }
+`;
 
 export function Capybara({
   stage,
@@ -24,7 +56,6 @@ export function Capybara({
   hasBird: boolean;
   size?: number;
 }) {
-  const reduceMotion = useReducedMotion();
   const scale = stage <= 1 ? 0.68 : stage <= 3 ? 0.84 : 1;
   const tx = 100 * (1 - scale);
   const ty = 130 * (1 - scale);
@@ -37,6 +68,8 @@ export function Capybara({
 
   return (
     <svg width={size} height={(size * 290) / 200} viewBox="0 0 200 290" role="img" aria-label="Your companion">
+      <style>{STYLE}</style>
+
       {showGarden && (
         <>
           <path d="M20 260 Q10 240 25 225 Q35 245 20 260 Z" fill={LEAF} opacity={0.35} />
@@ -50,20 +83,17 @@ export function Capybara({
         {seat === "pad" && (
           <>
             <ellipse cx="100" cy="255" rx="70" ry="14" fill={LEAF} />
-            {!reduceMotion && (
-              <motion.ellipse
-                cx="100"
-                cy="255"
-                rx="70"
-                ry="14"
-                fill="none"
-                stroke={LEAF}
-                strokeWidth="2"
-                style={{ transformOrigin: "100px 255px" }}
-                animate={{ scale: [1, 1.35], opacity: [0.5, 0] }}
-                transition={{ duration: 2.6, repeat: Infinity, ease: "easeOut" }}
-              />
-            )}
+            <ellipse
+              className="capy-ripple"
+              cx="100"
+              cy="255"
+              rx="70"
+              ry="14"
+              fill="none"
+              stroke={LEAF}
+              strokeWidth="2"
+              style={{ transformOrigin: "100px 255px" }}
+            />
           </>
         )}
         {seat === "shadow" && <ellipse cx="100" cy="250" rx="50" ry="10" fill="#00000014" />}
@@ -76,25 +106,21 @@ export function Capybara({
         )}
 
         {/* Everything below breathes gently as one group — the ground props above don't. */}
-        <motion.g
-          animate={reduceMotion ? undefined : { y: [0, -3, 0] }}
-          transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
-        >
+        <g className="capy-bob">
           {equipped.neck === "scarf" && (
             <path d="M62 178 Q100 200 138 178 L134 195 Q100 212 66 195 Z" fill="#B5533C" />
           )}
 
           <ellipse cx="100" cy="190" rx="65" ry="50" fill={FUR} />
 
-          <motion.ellipse
+          <ellipse
+            className="capy-ear"
             cx="65"
             cy="95"
             rx="14"
             ry="18"
             fill={FUR_DARK}
             style={{ transformOrigin: "65px 108px" }}
-            animate={reduceMotion ? undefined : { rotate: [0, -12, 0] }}
-            transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 5, ease: "easeInOut" }}
           />
           <ellipse cx="135" cy="95" rx="14" ry="18" fill={FUR_DARK} />
 
@@ -118,31 +144,23 @@ export function Capybara({
               <path d="M108 118 Q115 112 122 118" stroke={INK} strokeWidth="3" fill="none" strokeLinecap="round" />
             </>
           ) : (
-            <motion.g
-              style={{ transformOrigin: "100px 118px" }}
-              animate={reduceMotion ? undefined : { scaleY: [1, 1, 0.1, 1, 1] }}
-              transition={{ duration: 4, repeat: Infinity, times: [0, 0.9, 0.94, 0.98, 1], ease: "easeInOut" }}
-            >
+            <g className="capy-blink">
               <circle cx={alert ? 86 : 87} cy="118" r={alert ? 5.5 : 4.5} fill={INK} />
               <circle cx={alert ? 114 : 113} cy="118" r={alert ? 5.5 : 4.5} fill={INK} />
               <circle cx="88.5" cy="116.5" r="1" fill={HIGHLIGHT} />
               <circle cx="114.5" cy="116.5" r="1" fill={HIGHLIGHT} />
-            </motion.g>
+            </g>
           )}
 
           <path d="M88 168 Q100 173 112 168" stroke={INK_SOFT} strokeWidth="2.5" fill="none" strokeLinecap="round" />
 
-          {eyesClosed && !reduceMotion && (
-            <motion.path
+          {eyesClosed && (
+            <path
+              className="capy-chew"
               d="M113 148 Q128 143 130 153 Q120 158 113 148 Z"
               fill={LEAF}
               style={{ transformOrigin: "118px 152px" }}
-              animate={{ rotate: [0, -18, 0, -18, 0], scale: [1, 0.88, 1, 0.88, 1] }}
-              transition={{ duration: 1.6, repeat: Infinity, repeatDelay: 3, ease: "easeInOut" }}
             />
-          )}
-          {eyesClosed && reduceMotion && (
-            <path d="M113 148 Q128 143 130 153 Q120 158 113 148 Z" fill={LEAF} />
           )}
 
           {equipped.face === "reading_glasses" && (
@@ -179,41 +197,13 @@ export function Capybara({
           <ellipse cx="68" cy="235" rx="13" ry="10" fill={FUR_DARK} />
           <ellipse cx="132" cy="235" rx="13" ry="10" fill={FUR_DARK} />
 
-          {showGlow &&
-            (reduceMotion ? (
-              <>
-                <circle cx="35" cy="130" r="2" fill="#F0B865" opacity={0.8} />
-                <circle cx="165" cy="140" r="2.5" fill="#F0B865" opacity={0.7} />
-                <circle cx="150" cy="90" r="1.5" fill="#F0B865" opacity={0.9} />
-              </>
-            ) : (
-              <>
-                <motion.circle
-                  cx="35"
-                  cy="130"
-                  r="2"
-                  fill="#F0B865"
-                  animate={{ opacity: [0.3, 0.9, 0.3] }}
-                  transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-                />
-                <motion.circle
-                  cx="165"
-                  cy="140"
-                  r="2.5"
-                  fill="#F0B865"
-                  animate={{ opacity: [0.7, 0.2, 0.7] }}
-                  transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut", delay: 0.4 }}
-                />
-                <motion.circle
-                  cx="150"
-                  cy="90"
-                  r="1.5"
-                  fill="#F0B865"
-                  animate={{ opacity: [0.9, 0.4, 0.9] }}
-                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut", delay: 0.8 }}
-                />
-              </>
-            ))}
+          {showGlow && (
+            <>
+              <circle className="capy-twinkle" cx="35" cy="130" r="2" fill="#F0B865" />
+              <circle className="capy-twinkle-2" cx="165" cy="140" r="2.5" fill="#F0B865" />
+              <circle className="capy-twinkle-3" cx="150" cy="90" r="1.5" fill="#F0B865" />
+            </>
+          )}
 
           {hasBird && (
             <g transform="translate(112 55)">
@@ -224,7 +214,7 @@ export function Capybara({
               <path d="M-6 5 Q-10 8 -6 11" stroke="#3A5A7A" strokeWidth="1.5" fill="none" />
             </g>
           )}
-        </motion.g>
+        </g>
       </g>
     </svg>
   );
